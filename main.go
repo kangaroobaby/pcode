@@ -27,7 +27,10 @@ func main() {
 
 	f, ok := funcTable.SearchFunc("")
 	if !ok {
-		panic(errors.New("main func error"))
+		f, ok = funcTable.SearchFunc("main")
+		if !ok {
+			panic(errors.New("main func error"))
+		}
 	}
 
 	cmdCtx := core.CommandContext{}

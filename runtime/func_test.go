@@ -10,9 +10,9 @@ push 3
 mul
 add
 pop x ; pop command
-_NPRINT:;label 
+		_NPRINT:;label 
 print "hello world" ; hello
-var a,b,c; vaiables
+		var a,b,c; vaiables
 `)
 	err := f.Initialize()
 	if err != nil {

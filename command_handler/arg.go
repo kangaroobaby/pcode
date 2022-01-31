@@ -12,6 +12,7 @@ func (*ArgHandler) Run(cmdCtx core.CommandContext) error {
 	// (RetInfo)
 	retInfo := cmdCtx.Stack.Pop().(RetInfo)
 	defer cmdCtx.Stack.Push(retInfo)
+
 	retInfo.ArgNumber = len(cmdCtx.Values)
 
 	args := make([]int, len(cmdCtx.Values))

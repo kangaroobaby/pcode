@@ -36,9 +36,9 @@ func (f *FuncTable) extractFunc(r *bufio.Reader, funcName string) error {
 			return err
 		}
 
-		// 去掉前面空格
+		// 去掉前面空格，tab键
 		for {
-			if line[0] != ' ' {
+			if line[0] != ' ' && line[0] != '\t' {
 				break
 			}
 			line = line[1:]
@@ -92,6 +92,10 @@ func (f *FuncTable) extractFunc(r *bufio.Reader, funcName string) error {
 
 		// 添加新代码行
 		content += line
+	}
+
+	if content == "" {
+		return nil
 	}
 
 	newFunc := NewFunc(content)

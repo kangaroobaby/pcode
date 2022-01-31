@@ -38,9 +38,9 @@ func (f *Func) Initialize() error {
 			return err
 		}
 
-		// 去掉前面空格
+		// 去掉前面空格、TAB键
 		for {
-			if line[0] != ' ' {
+			if line[0] != ' ' && line[0] != '\t' {
 				break
 			}
 			line = line[1:]
@@ -80,6 +80,11 @@ func (f *Func) Next() (core.Command, error) {
 	}
 
 	return f.parseCode(sourceCode)
+}
+
+func (f *Func) Seek(eip int) error {
+	f.eip = eip
+	return nil
 }
 
 func (f *Func) parseCode(code string) (core.Command, error) {
@@ -148,7 +153,7 @@ func (f *Func) parseCode(code string) (core.Command, error) {
 
 	}
 
-	return core.Command{operate, values}, nil
+	return core.Command{f.eip, operate, values}, nil
 }
 
 func (f *Func) Goto(labelName string) error {
