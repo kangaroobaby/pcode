@@ -78,7 +78,7 @@ func (f *Func) Next() (core.Command, error) {
 }
 
 func (f *Func) Seek(pointer core.Pointer) error {
-	if pointer == nil {
+	if pointer == core.NullPointer {
 		f.eip = 0
 	} else {
 		f.eip = pointer.(int)
@@ -166,14 +166,38 @@ func (f *Func) Goto(labelName string) error {
 }
 
 func (f *Func) DebugInfo() Detail {
-	list := make([]string, 0, 500)
+	var eip = f.eip
+
+	if eip < len(f.sourceCodes) {
+		// 跳过标签
+		for {
+			line := f.sourceCodes[eip]
+			for {
+				if line[0] == ' ' || line[0] == ':' || line[0] == '\n' {
+					break
+				}
+				line = line[1:]
+			}
+			if line[0] == ' ' || line[0] == '\n' {
+				break
+			}
+			eip++
+		}
+	}
+
+	list := make([]string, len(f.sourceCodes)+1)
 	for i, value := range f.sourceCodes {
 		n := len(value)
-		if i == f.eip {
-			list = append(list, fmt.Sprintf("->%s", value[:n-1]))
+		if i == eip {
+			list[i] = fmt.Sprintf("->%s", value[:n-1])
 		} else {
-			list = append(list, fmt.Sprintf("  %s", value[:n-1]))
+			list[i] = fmt.Sprintf("  %s", value[:n-1])
 		}
+	}
+
+	// 优化显示
+	if eip == len(f.sourceCodes) {
+		list[eip] = "->"
 	}
 
 	return Detail{"  Code", list}

@@ -39,7 +39,7 @@ func main() {
 	cmdCtx.LabelTable = impl.NewLabelTable(cmdCtx)
 
 	callHandler := &handler.CallHandler{}
-	err = callHandler.Run(cmdCtx)
+	err = callHandler.Call(cmdCtx)
 	check(err)
 }
 

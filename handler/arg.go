@@ -9,11 +9,11 @@ type ArgHandler struct {
 }
 
 func (*ArgHandler) Run(cmdCtx core.CommandContext) error {
+	var retInfo RetInfo
 	// (RetInfo)
-	retInfo := cmdCtx.Stack.Pop().(RetInfo)
+	retInfo = cmdCtx.Stack.Pop().(RetInfo)
+	retInfo = RetInfo{len(cmdCtx.Values)}
 	defer cmdCtx.Stack.Push(retInfo)
-
-	retInfo.ArgNumber = len(cmdCtx.Values)
 
 	args := make([]int, len(cmdCtx.Values))
 	for i, _ := range cmdCtx.Values {

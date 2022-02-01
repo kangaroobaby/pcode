@@ -9,10 +9,10 @@ type PrintHandler struct {
 }
 
 func (*PrintHandler) Run(cmdCtx core.CommandContext) error {
-	var format = cmdCtx.Values[0].(string)
+	var format = cmdCtx.Values[0].(string) + "\n"
 	var values = make([]interface{}, 0, 5)
 
-	line := format + "\n"
+	line := format
 	for {
 		for {
 			if line[0] == '%' || line[0] == '\n' {
@@ -35,6 +35,12 @@ func (*PrintHandler) Run(cmdCtx core.CommandContext) error {
 
 	reverse(values)
 
-	_, err := fmt.Printf(format, values...)
+	var err error
+
+	if *debug {
+		_, err = fmt.Fprintf(&stringBuffer, format, values...)
+	} else {
+		_, err = fmt.Printf(format, values...)
+	}
 	return err
 }

@@ -58,6 +58,7 @@ func (a *AdvanceStack) DebugInfo() Detail {
 			list = append(list, fmt.Sprintf("%d", value))
 		}
 	}
+	list = list[1:]
 
 	return Detail{"Stack", list}
 }

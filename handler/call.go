@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"main/core"
@@ -8,6 +9,8 @@ import (
 )
 
 var debug = flag.Bool("d", false, "open debug mode")
+
+var stringBuffer bytes.Buffer // print for debug
 
 type CallHandler struct {
 }
@@ -19,16 +22,22 @@ func (c *CallHandler) Run(cmdCtx core.CommandContext) error {
 	for {
 		if *debug {
 			impl.PrintDebugInfoWithContext(cmdCtx)
-			fmt.Println("\n***Terminal***")
+			fmt.Printf("\n***Terminal***\n%s\n", stringBuffer.String())
+			if !immediate {
+				var input string
+				fmt.Printf("\n\npress enter to step, -r to run.")
+				fmt.Scanf("%s\n", &input)
+				if input == "-r" {
+					immediate = true
+				}
+			}
 		}
 
 		cmdCtx.Command, err = cmdCtx.Func.Next()
 		if err == core.EOF {
 			break
 		}
-		if err != nil {
-			return err
-		}
+		check(err)
 
 		handler, ok := getHandler(cmdCtx)
 		if !ok {
@@ -42,33 +51,22 @@ func (c *CallHandler) Run(cmdCtx core.CommandContext) error {
 				newCtx.VarTable = impl.NewVarTable(newCtx)
 				newCtx.LabelTable = impl.NewLabelTable(newCtx)
 
-				newCtx.Func.Seek(nil)
-				defer cmdCtx.Func.Seek(cmdCtx.Pointer)
-
-				err = c.Call(newCtx)
-				if err != nil {
-					return fmt.Errorf("call error: %v", cmdCtx.Command)
-				}
+				func() {
+					newCtx.Func.Seek(core.NullPointer)
+					defer cmdCtx.Func.Seek(cmdCtx.Pointer)
+					check(c.Call(newCtx))
+				}()
 
 				continue
 			}
 			return fmt.Errorf("can't find handler: %v", cmdCtx.Command)
 		}
 
-		err = handler.Run(cmdCtx)
-		if err != nil {
-			return err
-		}
+		check(handler.Run(cmdCtx))
 
-		if *debug {
-			if !immediate {
-				var input string
-				fmt.Printf("\n\n\npress enter to step, -r to run.")
-				fmt.Scanf("%s\n", &input)
-				if input == "-r" {
-					immediate = true
-				}
-			}
+		// return ?
+		if _, ok = handler.(*ReturnHandler); ok {
+			break
 		}
 	}
 
@@ -102,4 +100,10 @@ func getHandler(cmdCtx core.CommandContext) (core.CommandHandler, bool) {
 
 	handler, ok := handlers[cmdCtx.Operate]
 	return handler, ok
+}
+
+func check(err error) {
+	if err != nil {
+		panic(err)
+	}
 }

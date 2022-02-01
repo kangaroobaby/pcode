@@ -37,6 +37,7 @@ func (v *VarTable) DebugInfo() Detail {
 	if n > 0 {
 		list[n-1] += "<-"
 	}
+	list = list[1:]
 
 	return Detail{"Bind var", list}
 }
