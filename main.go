@@ -3,25 +3,21 @@ package main
 import (
 	"context"
 	"errors"
+	"flag"
 	"io/ioutil"
-	"main/command_handler"
 	"main/core"
-	"main/runtime"
-	"os"
+	"main/handler"
+	"main/impl"
 )
 
-func main() {
-	var sourceFile string
-	if len(os.Args) > 1 {
-		sourceFile = os.Args[1]
-	} else {
-		sourceFile = "demo.asm"
-	}
+var sourceFile = flag.String("f", "demo.asm", "pcode source file")
 
-	content, err := ioutil.ReadFile(sourceFile)
+func main() {
+	flag.Parse()
+	content, err := ioutil.ReadFile(*sourceFile)
 	check(err)
 
-	funcTable := runtime.NewFuncTable(string(content))
+	funcTable := impl.NewFuncTable(string(content))
 	err = funcTable.Initialize()
 	check(err)
 
@@ -36,13 +32,14 @@ func main() {
 	cmdCtx := core.CommandContext{}
 	cmdCtx.Ctx = context.Background()
 	cmdCtx.Command = core.Command{}
-	cmdCtx.Stack = runtime.NewAdvanceStack()
+	cmdCtx.Stack = impl.NewAdvanceStack()
 	cmdCtx.Func = f
 	cmdCtx.FuncTable = funcTable
-	cmdCtx.VarTable = runtime.NewVarTable(cmdCtx)
+	cmdCtx.VarTable = impl.NewVarTable(cmdCtx)
+	cmdCtx.LabelTable = impl.NewLabelTable(cmdCtx)
 
-	callHandler := &command_handler.CallHandler{}
-	err = callHandler.Call(cmdCtx)
+	callHandler := &handler.CallHandler{}
+	err = callHandler.Run(cmdCtx)
 	check(err)
 }
 

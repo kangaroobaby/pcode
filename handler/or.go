@@ -1,14 +1,14 @@
-package command_handler
+package handler
 
 import "main/core"
 
-type LessthanHandler struct {
+type OrHandler struct {
 }
 
-func (*LessthanHandler) Run(cmdCtx core.CommandContext) error {
+func (*OrHandler) Run(cmdCtx core.CommandContext) error {
 	b := cmdCtx.Stack.Pop().(int)
 	a := cmdCtx.Stack.Pop().(int)
-	if a < b {
+	if a == 1 || b == 1 {
 		cmdCtx.Stack.Push(1)
 	} else {
 		cmdCtx.Stack.Push(0)

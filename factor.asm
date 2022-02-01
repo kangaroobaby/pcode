@@ -74,10 +74,6 @@ FUNC @main:
 ; }
 ENDFUNC
 
-        push 1
-		push 1
-        $factor
-        print "%d! = %d"
 ; int factor(int n) {
 FUNC @factor:
     arg n

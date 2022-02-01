@@ -1,6 +1,9 @@
-package runtime
+package impl
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 type AdvanceStack struct {
 	mem []interface{}
@@ -44,4 +47,17 @@ func (a *AdvanceStack) Write(pos int, i interface{}) {
 
 	a.mem[pos] = i
 
+}
+
+func (a *AdvanceStack) DebugInfo() Detail {
+	list := make([]string, 0, 100)
+	for _, value := range a.mem {
+		if value == nil {
+			list = append(list, "/")
+		} else {
+			list = append(list, fmt.Sprintf("%d", value))
+		}
+	}
+
+	return Detail{"Stack", list}
 }

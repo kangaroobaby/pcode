@@ -1,4 +1,4 @@
-package command_handler
+package handler
 
 type RetInfo struct {
 	ArgNumber int

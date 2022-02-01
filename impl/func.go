@@ -1,8 +1,7 @@
-package runtime
+package impl
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"io"
 	"main/core"
@@ -15,10 +14,6 @@ type Func struct {
 	sourceCodes []string
 	eip         int
 }
-
-var (
-	EOF = errors.New("EOF")
-)
 
 func NewFunc(content string) *Func {
 	return &Func{
@@ -60,7 +55,7 @@ func (f *Func) Next() (core.Command, error) {
 	var sourceCode string
 	for {
 		if f.eip >= len(f.sourceCodes) {
-			return core.Command{}, EOF
+			return core.Command{}, core.EOF
 		}
 
 		sourceCode = f.sourceCodes[f.eip]
@@ -82,8 +77,12 @@ func (f *Func) Next() (core.Command, error) {
 	return f.parseCode(sourceCode)
 }
 
-func (f *Func) Seek(eip int) error {
-	f.eip = eip
+func (f *Func) Seek(pointer core.Pointer) error {
+	if pointer == nil {
+		f.eip = 0
+	} else {
+		f.eip = pointer.(int)
+	}
 	return nil
 }
 
@@ -153,7 +152,7 @@ func (f *Func) parseCode(code string) (core.Command, error) {
 
 	}
 
-	return core.Command{f.eip, operate, values}, nil
+	return core.Command{operate, values, f.eip}, nil
 }
 
 func (f *Func) Goto(labelName string) error {
@@ -164,4 +163,18 @@ func (f *Func) Goto(labelName string) error {
 		}
 	}
 	return fmt.Errorf("can't find label: %s", labelName)
+}
+
+func (f *Func) DebugInfo() Detail {
+	list := make([]string, 0, 500)
+	for i, value := range f.sourceCodes {
+		n := len(value)
+		if i == f.eip {
+			list = append(list, fmt.Sprintf("->%s", value[:n-1]))
+		} else {
+			list = append(list, fmt.Sprintf("  %s", value[:n-1]))
+		}
+	}
+
+	return Detail{"  Code", list}
 }
